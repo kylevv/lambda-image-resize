@@ -7,10 +7,17 @@
   "license": "Apache-2.0",
   "main": "index.js",
   "scripts": {
-    "zip": "zip -r -q $npm_package_name.zip . -x \"*.log\" -x \"*.lock\" -x \"*.git*\""
+    "postinstall": "echo hello-world",
+    "sharp": "rm -rf node_modules/sharp && yarn add --arch=x64 --platform=linux --target=8.10.0 sharp",
+    "zip": "zip -r -q $npm_package_name.zip . -x \"*.md\" -x \"*.git*\"",
+    "clean": "rm -f *.zip",
+    "build": "npm run clean && npm run zip"
   },
+  "os": [
+    "linux"
+  ],
   "dependencies": {
-    "sharp": "^0.17.3"
+    "sharp": "^0.21.1"
   },
   "devDependencies": {
     "aws-sdk": "^2.36.0"
