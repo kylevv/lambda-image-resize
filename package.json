@@ -1,6 +1,6 @@
 {
   "name": "lambda-image-resize",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Serverless image resizing",
   "readme": "Serverless image resizing",
   "repository": "https://github.com/kylevv/lambda-image-resize",

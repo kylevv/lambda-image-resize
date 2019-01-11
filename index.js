@@ -14,16 +14,15 @@ const ORIGINAL_PREFIX = process.env.ORIGINAL_PREFIX
 exports.handler = function (event, context, callback) {
   const key = event.queryStringParameters.key
   console.log('KEY:', key)
-  const match = key && key.match(/((\d+)x(\d+))\/(.*)/)
+  const match = key && key.match(/^((\d+)x(\d+))\/(.+\.jpg)$/)
 
   // Check if valid query and if requested resolution is allowed
-  if (!!match && ALLOWED_RESOLUTIONS.size !== 0 && !ALLOWED_RESOLUTIONS.has(match[1])) {
-    callback(null, {
+  if (!match || !ALLOWED_RESOLUTIONS.size || !ALLOWED_RESOLUTIONS.has(match[1])) {
+    return callback(null, {
       statusCode: '403',
       headers: {},
       body: ''
     })
-    return
   }
 
   const width = parseInt(match[2], 10)
@@ -31,7 +30,11 @@ exports.handler = function (event, context, callback) {
   const fit = match[1] === '150x100' ? 'cover' : 'contain'
   const originalKey = `${ORIGINAL_PREFIX}/${match[4]}`
 
-  S3.getObject({Bucket: BUCKET, Key: originalKey}).promise()
+  S3.listObjects({Bucket: BUCKET, Prefix: originalKey.replace(/\.jpg$/, '')}).promise()
+    .then((data) => {
+      if (!data || !data.Contents || !data.Contents.length) return Promise.reject(new Error('No S3 results'))
+      return S3.getObject({Bucket: BUCKET, Key: data.Contents[0].Key}).promise()
+    })
     .then(data => Sharp(data.Body)
       .resize(width, height, { fit })
       .toFormat('png')
